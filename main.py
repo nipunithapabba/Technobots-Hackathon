@@ -96,15 +96,21 @@ def server_status():
     }
 
 
+from ml.predict import predict_eta
+
 @app.get("/eta")
-def get_eta(bus_id: str, stop_name: str):
-    """
-    Placeholder ETA endpoint — Member 2 will connect the real ML model here.
-    For now returns a dummy estimate.
-    """
+def get_eta(
+    bus_id: str,
+    stop_index: int = 0,
+    network: str = Query(default="good")
+):
+    network_quality = 1 if network == "good" else 0
+    result = predict_eta(stop_index=stop_index, network_quality=network_quality)
     return {
         "bus_id": bus_id,
-        "destination": stop_name,
-        "eta_minutes": 4,
-        "confidence": "placeholder — ML model pending"
+        "eta_minutes": result["eta_minutes"],
+        "stops_remaining": result["stops_remaining"],
+        "condition": result["condition"],
+        "network_note": result["network_note"],
+        "predicted_at": result["predicted_at"]
     }
