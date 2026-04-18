@@ -1,6 +1,3 @@
-<<<<<<< HEAD
- 
-=======
 import joblib
 import pandas as pd
 import os
@@ -43,7 +40,6 @@ def predict_eta(stop_index: int, network_quality: int = 1) -> dict:
         "predicted_at": now.strftime("%H:%M:%S")
     }
 
-
 if __name__ == "__main__":
     print("🧪 Testing predictions:\n")
     test_cases = [
@@ -57,4 +53,3 @@ if __name__ == "__main__":
         print(f"  Stop {case['stop_index']} | Network {'Good' if case['network_quality'] else 'Poor'}")
         print(f"  → ETA: {result['eta_minutes']} mins | {result['condition']}")
         print(f"  → {result['network_note']}\n")
->>>>>>> e8a28f5dd3dc573d51eb2d78344a3838d350f529

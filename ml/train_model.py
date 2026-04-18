@@ -1,6 +1,3 @@
-<<<<<<< HEAD
- 
-=======
 import pandas as pd
 import numpy as np
 import joblib
@@ -48,4 +45,3 @@ for feat, imp in sorted(zip(FEATURES, importances), key=lambda x: -x[1]):
 
 joblib.dump(model, "ml/bus_eta_model.pkl")
 print("\n💾 Model saved to ml/bus_eta_model.pkl")
->>>>>>> e8a28f5dd3dc573d51eb2d78344a3838d350f529
