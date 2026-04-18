@@ -18,7 +18,7 @@ that works reliably even under low bandwidth and high latency conditions.
 |--------|------|
 | Bollena Chervitha | Backend (FastAPI, Simulator, Buffer) |
 | Renu Priya Molgara | ML (ETA Prediction Model) |
-| vuppula Nishitha | Frontend (Map UI, ThinkRoot) |
+| Vuppula Nishitha | Frontend (Map UI, ThinkRoot) |
 | Nipunitha Pabba | Integration, Deployment, Testing |
 
 ---
