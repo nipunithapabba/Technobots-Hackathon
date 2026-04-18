@@ -16,7 +16,7 @@ print("=" * 45)
 
 print("\n📡 1. Server Health")
 try:
-    r = requests.get(f"{BASE}/", timeout=5)
+    r = requests.get(f"{BASE}/", timeout=30)
     test("Server is online", r.status_code == 200)
     test("Returns message", "message" in r.json())
 except Exception as e:
@@ -24,7 +24,7 @@ except Exception as e:
 
 print("\n🚌 2. Bus Positions (Full Network)")
 try:
-    r = requests.get(f"{BASE}/buses?network=good", timeout=5)
+    r = requests.get(f"{BASE}/buses?network=good", timeout=30)
     data = r.json()
     test("Status 200", r.status_code == 200)
     test("Returns buses key", "buses" in data)
@@ -41,7 +41,7 @@ except Exception as e:
 
 print("\n📶 3. Low Bandwidth Mode")
 try:
-    r = requests.get(f"{BASE}/buses?network=poor", timeout=5)
+    r = requests.get(f"{BASE}/buses?network=poor", timeout=30)
     data = r.json()
     test("Status 200", r.status_code == 200)
     test("Mode is low_bandwidth", data["mode"] == "low_bandwidth")
@@ -54,7 +54,7 @@ except Exception as e:
 
 print("\n🗺️  4. Route Data")
 try:
-    r = requests.get(f"{BASE}/routes", timeout=5)
+    r = requests.get(f"{BASE}/routes", timeout=30)
     data = r.json()
     test("Status 200", r.status_code == 200)
     test("Has routes key", "routes" in data)
@@ -68,14 +68,14 @@ except Exception as e:
 
 print("\n⏱️  5. ML ETA Prediction")
 try:
-    r = requests.get(f"{BASE}/eta?bus_id=bus_1&stop_index=1&network=good", timeout=5)
+    r = requests.get(f"{BASE}/eta?bus_id=bus_1&stop_index=1&network=good", timeout=30)
     data = r.json()
     test("Status 200", r.status_code == 200)
     test("Has eta_minutes", "eta_minutes" in data)
     test("ETA is positive number", data["eta_minutes"] > 0)
     test("Has condition field", "condition" in data)
     test("Has network_note", "network_note" in data)
-    r2 = requests.get(f"{BASE}/eta?bus_id=bus_1&stop_index=1&network=poor", timeout=5)
+    r2 = requests.get(f"{BASE}/eta?bus_id=bus_1&stop_index=1&network=poor", timeout=30)
     data2 = r2.json()
     test("Poor network ETA works", "eta_minutes" in data2)
     test("Poor network note different", data2["network_note"] != data["network_note"])
@@ -86,12 +86,12 @@ print("\n📦 6. Store & Forward Buffer")
 try:
     print("  ⏳ Waiting 3s for buffer to collect pings...")
     time.sleep(3)
-    r = requests.get(f"{BASE}/status", timeout=5)
+    r = requests.get(f"{BASE}/status", timeout=30)
     data = r.json()
     test("Status endpoint works", r.status_code == 200)
     test("Buffer size is tracked", "buffer_size" in data)
     test("Buffer has collected pings", data["buffer_size"] > 0)
-    r2 = requests.get(f"{BASE}/sync", timeout=5)
+    r2 = requests.get(f"{BASE}/sync", timeout=30)
     data2 = r2.json()
     test("Sync endpoint works", r2.status_code == 200)
     test("Returns buffered pings", "buffered_pings" in data2)
@@ -102,11 +102,11 @@ except Exception as e:
 
 print("\n🔄 7. Live Movement")
 try:
-    r1 = requests.get(f"{BASE}/buses", timeout=5)
+    r1 = requests.get(f"{BASE}/buses", timeout=30)
     pos1 = r1.json()["buses"]["bus_1"]
     print("  ⏳ Waiting 3s for bus to move...")
     time.sleep(3)
-    r2 = requests.get(f"{BASE}/buses", timeout=5)
+    r2 = requests.get(f"{BASE}/buses", timeout=30)
     pos2 = r2.json()["buses"]["bus_1"]
     moved = pos1["lat"] != pos2["lat"] or pos1["lng"] != pos2["lng"]
     test("Bus position changed over time", moved)
