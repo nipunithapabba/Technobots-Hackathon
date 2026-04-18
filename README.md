@@ -7,7 +7,7 @@ that works reliably even under low bandwidth and high latency conditions.
 ---
 
 ## 🚀 Live Demo
-- **Frontend:** [ThinkRoot Deployment URL - Coming Soon]
+- **Frontend:** https://campus-bus-tracker-9h48m.thinkroot.app/
 - **Backend API:** https://technobots-bus-tracker.onrender.com
 - **API Docs:** https://technobots-bus-tracker.onrender.com/docs
 
@@ -16,10 +16,10 @@ that works reliably even under low bandwidth and high latency conditions.
 ## 👥 Team — Technobots
 | Member | Role |
 |--------|------|
-| Member 1 | Backend (FastAPI, Simulator, Buffer) |
-| Member 2 | ML (ETA Prediction Model) |
-| Member 3 | Frontend (Map UI, ThinkRoot) |
-| Member 4 | Integration, Deployment, Testing |
+| Bollena Chervitha | Backend (FastAPI, Simulator, Buffer) |
+| Renu Priya Molgara | ML (ETA Prediction Model) |
+| vuppula Nishitha | Frontend (Map UI, ThinkRoot) |
+| Nipunitha Pabba | Integration, Deployment, Testing |
 
 ---
 
