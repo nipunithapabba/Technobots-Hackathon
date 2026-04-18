@@ -8,8 +8,8 @@ that works reliably even under low bandwidth and high latency conditions.
 
 ## 🚀 Live Demo
 - **Frontend:** [ThinkRoot Deployment URL - Coming Soon]
-- **Backend API:** [Render Deployment URL - Coming Soon]
-- **API Docs:** [Render Deployment URL - Coming Soon]/docs
+- **Backend API:** https://technobots-bus-tracker.onrender.com
+- **API Docs:** https://technobots-bus-tracker.onrender.com/docs
 
 ---
 

@@ -1,7 +1,7 @@
 import requests
 import time
 
-BASE = "http://127.0.0.1:8000"
+BASE = "https://technobots-bus-tracker.onrender.com"
 
 print("\n🎬 NETWORK RESILIENCE DEMO")
 print("=" * 40)
