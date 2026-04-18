@@ -1,6 +1,3 @@
-<<<<<<< HEAD
- 
-=======
 import pandas as pd
 import numpy as np
 import random
@@ -20,10 +17,8 @@ for _ in range(2000):
 
     if (8 <= hour <= 10) or (16 <= hour <= 18):
         base_eta += random.uniform(2, 6)
-
     if day_of_week >= 5:
         base_eta -= random.uniform(0, 2)
-
     if network_quality == 0:
         base_eta += random.uniform(-1, 3)
 
@@ -43,4 +38,3 @@ df = pd.DataFrame(records)
 df.to_csv("ml/historical_data.csv", index=False)
 print(f"✅ Generated {len(df)} records")
 print(df.head(10))
->>>>>>> e8a28f5dd3dc573d51eb2d78344a3838d350f529
