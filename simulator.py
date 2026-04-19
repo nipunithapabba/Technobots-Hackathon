@@ -3,6 +3,7 @@
 import asyncio
 import time
 from routes import ROUTES
+import random
 
 # Tracks current state of each bus
 bus_state = {
@@ -16,34 +17,36 @@ def interpolate(stop_a, stop_b, progress):
     lng = stop_a["lng"] + (stop_b["lng"] - stop_a["lng"]) * progress
     return lat, lng
 
+# Add a global variable for weather (we can automate this later)
+current_weather = "Rainy" # Try changing this to "Clear" to see ETAs drop!
+
 def get_bus_positions():
-    """Return current GPS position of all buses"""
     positions = {}
     for bus_id, state in bus_state.items():
         route = ROUTES[state["route"]]
-        stops = route["stops"]
+        path = route["waypoint_path"]
         i = state["stop_index"]
 
-        # If bus reached the last stop, loop back to start
-        if i >= len(stops) - 1:
+        if i >= len(path) - 1:
             state["stop_index"] = 0
-            state["progress"] = 0.0
             i = 0
 
-        stop_a = stops[i]
-        stop_b = stops[i + 1]
+        stop_a = {"lat": path[i][0], "lng": path[i][1]}
+        stop_b = {"lat": path[i+1][0], "lng": path[i+1][1]}
         lat, lng = interpolate(stop_a, stop_b, state["progress"])
+
+        # NEW: Random occupancy (how full the bus is)
+        occupancy = random.choice(["Low", "Medium", "High"])
 
         positions[bus_id] = {
             "bus_id": bus_id,
             "lat": round(lat, 6),
             "lng": round(lng, 6),
-            "route": state["route"],
             "route_name": route["name"],
-            "next_stop": stop_b["name"],
+            "occupancy": occupancy, # New Field
+            "weather": current_weather, # New Field
             "timestamp": time.time()
         }
-
     return positions
 
 def update_bus_positions():
