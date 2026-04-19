@@ -385,19 +385,30 @@ function renderSidebar(){
   const list = document.getElementById("bus-list");
   const ids = Object.keys(apiBuses);
   document.getElementById("bus-count").textContent = ids.length;
+
+  if(ids.length === 0){
+    list.innerHTML = `<div style="color:var(--muted);font-size:0.82rem;padding:8px 0;">📡 Waiting for bus data...</div>`;
+    return;
+  }
+
   list.innerHTML = ids.map(id => {
     const bus = apiBuses[id];
-    const rd = ROUTES[id];
+    // Check if we have a match in our local ROUTES object
+    const rd = ROUTES[id] || {label: id, name: bus.route_name || "Unknown Route", color: "#38bdf8"};
     const eta = etaCache[id];
+    
     return `<button class="bus-card ${selBus===id?'active':''}" onclick="focusBus('${id}')">
       <div class="bc-top">
-        <div class="bc-stripe" style="background:${rd?rd.color:'#38bdf8'}"></div>
-        <div class="bc-info"><div class="bc-name">${rd?rd.label:id}</div><div class="bc-route">${rd?rd.name:'—'}</div></div>
-        <div class="occ-badge ${bus.occupancy}">${bus.occupancy}</div>
+        <div class="bc-stripe" style="background:${rd.color}"></div>
+        <div class="bc-info">
+          <div class="bc-name">${rd.label}</div>
+          <div class="bc-route">${rd.name}</div>
+        </div>
+        <div class="occ-badge ${bus.occupancy || 'Low'}">${bus.occupancy || 'Low'}</div>
       </div>
-      <div class="bc-row"><span>Next</span><strong>${bus.next_stop}</strong></div>
-      <div class="bc-row"><span>Weather</span><strong>${bus.weather}</strong></div>
-      ${eta ? `<div class="bc-eta"><span>ETA</span><b>${eta.eta_minutes} min</b></div>`:''}
+      <div class="bc-row"><span>Next stop</span><strong>${bus.next_stop || "—"}</strong></div>
+      <div class="bc-row"><span>Weather</span><strong>${bus.weather || "Clear"}</strong></div>
+      ${eta ? `<div class="bc-eta"><span>ETA</span><b>${eta.eta_minutes} min</b></div>` : ""}
     </button>`;
   }).join("");
 }
