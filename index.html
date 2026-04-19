@@ -411,7 +411,7 @@
   </main>
 
   <script>
-    const API_BASE = "/api";
+    const API_BASE = "http://127.0.0.1:8000";
 
     let map;
     let tileLayer;
@@ -530,66 +530,42 @@
       });
     }
 
-    async function updateBuses() {
-      const network = detectNetworkQuality();
+async function updateBuses() {
+    try {
+        // We fetch the latest data from FastAPI server
+        const res = await fetch(`${API_BASE}/get-latest`);
+        const bus = await res.json();
 
-      try {
-        const res = await fetch(`${API_BASE}/buses?network=${network}`);
-        const data = await res.json();
+        if (bus.error) {
+            console.log("Waiting for bus data...");
+            return;
+        }
 
-        currentBuses = data.buses;
+        const point = [bus.lat, bus.lon];
 
-        document.getElementById("network-mode").textContent =
-          data.mode === "low_bandwidth" ? "Low Bandwidth" : "Full";
+        // If the bus marker doesn't exist yet, create it
+        if (!busMarkers["bus_1"]) {
+            busMarkers["bus_1"] = L.marker(point, {
+                icon: getBusIcon({marker_color: "#38bdf8", label: "Technobot-1"}, 0)
+            }).addTo(map);
+        } else {
+            // Move the bus to the new position
+            busMarkers["bus_1"].setLatLng(point);
+        }
 
-        document.getElementById("last-update").textContent =
-          new Date().toLocaleTimeString();
+        // Update the UI status
+        document.getElementById("network-badge").textContent = bus.network_strength;
+        document.getElementById("network-badge").className = 
+            bus.network_strength === "Offline" ? "network-badge offline" : "network-badge";
+        
+        document.getElementById("last-update").textContent = new Date().toLocaleTimeString();
 
-        document.getElementById("network-badge").textContent = "Live";
-        document.getElementById("network-badge").className = "network-badge";
-
-        Object.values(data.buses).forEach(bus => {
-          const point = [bus.lat, bus.lng];
-
-          if (!busHistory[bus.id]) busHistory[bus.id] = [];
-
-          const previous = busHistory[bus.id][busHistory[bus.id].length - 1] || point;
-          const rotation = bearing(previous, point);
-
-          busHistory[bus.id].push(point);
-          if (busHistory[bus.id].length > 28) busHistory[bus.id].shift();
-
-          if (!busMarkers[bus.id]) {
-            busMarkers[bus.id] = L.marker(point, {
-              icon: getBusIcon(bus, rotation)
-            })
-            .addTo(map)
-            .bindPopup(`<b>${bus.label}</b><br>${bus.route_name}<br>Next stop: ${bus.next_stop}`);
-          } else {
-            busMarkers[bus.id].setLatLng(point);
-            busMarkers[bus.id].setIcon(getBusIcon(bus, rotation));
-            busMarkers[bus.id].setPopupContent(
-              `<b>${bus.label}</b><br>${bus.route_name}<br>Next stop: ${bus.next_stop}`
-            );
-          }
-
-          if (busTrails[bus.id]) map.removeLayer(busTrails[bus.id]);
-
-          busTrails[bus.id] = L.polyline(busHistory[bus.id], {
-            color: bus.marker_color,
-            weight: 3,
-            opacity: 0.72
-          }).addTo(map);
-        });
-
-        updateSidebar();
-        updateBufferInfo();
-      } catch {
-        const badge = document.getElementById("network-badge");
-        badge.textContent = "Offline";
-        badge.className = "network-badge offline";
-      }
+    } catch (e) {
+        console.error("Backend not reachable. Make sure FastAPI is running!");
+        document.getElementById("network-badge").textContent = "Offline";
+        document.getElementById("network-badge").className = "network-badge offline";
     }
+}
 
     function updateSidebar() {
       const list = document.getElementById("bus-list");
