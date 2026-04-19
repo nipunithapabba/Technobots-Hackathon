@@ -70,7 +70,6 @@
       font-size:0.78rem;font-weight:700;color:#fff;
       background:#16a34a;transition:background 0.3s;
     }
-    .net-badge.offline{background:#dc2626;}
 
     .body{flex:1;min-height:0;display:flex;overflow:hidden;}
 
@@ -92,35 +91,23 @@
     }
 
     .sidebar-toggle{
-      position:absolute;
-      top:78px;left:300px;
-      width:22px;height:44px;
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-left:none;
-      border-radius:0 8px 8px 0;
-      cursor:pointer;z-index:200;
-      display:flex;align-items:center;justify-content:center;
-      color:var(--muted);font-size:0.9rem;
+      position:absolute; top:78px; left:300px;
+      width:22px; height:44px;
+      background:var(--panel); border:1px solid var(--border);
+      border-left:none; border-radius:0 8px 8px 0;
+      cursor:pointer; z-index:200;
+      display:flex; align-items:center; justify-content:center;
+      color:var(--muted); font-size:0.9rem;
       transition:left 0.28s ease;
     }
     #sidebar.closed ~ .sidebar-toggle{left:0;}
 
-    .sec-label{
-      font-size:0.68rem;text-transform:uppercase;
-      letter-spacing:0.12em;color:var(--muted);font-weight:800;
-    }
-
     .bus-card{
-      width:100%;text-align:left;
-      border:1px solid var(--border);
-      background:var(--surface);
-      color:var(--text);
-      border-radius:14px;padding:12px;
-      cursor:pointer;transition:all 0.2s ease;
-      border-left: 4px solid transparent;
+      width:100%; text-align:left; border:1px solid var(--border);
+      background:var(--surface); color:var(--text);
+      border-radius:14px; padding:12px; cursor:pointer;
+      transition:all 0.2s ease; border-left: 4px solid transparent;
     }
-    .bus-card:hover{border-color:var(--accent);}
     .bus-card.active{border-color:var(--accent); background:rgba(56, 189, 248, 0.05); border-left-color: var(--accent);}
 
     .bc-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
@@ -129,53 +116,30 @@
     .bc-name{font-size:0.92rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .bc-route{font-size:0.75rem;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-    .bc-row{
-      display:flex;justify-content:space-between;align-items:center;
-      font-size:0.78rem;color:var(--muted);
-      padding:4px 0;border-top:1px solid var(--border);
-    }
-    .bc-row strong{color:var(--text);font-size:0.82rem;}
-    
-    .occ-badge {
-        font-size: 0.65rem; padding: 2px 8px; border-radius: 4px;
-        font-weight: bold; text-transform: uppercase;
-    }
+    .occ-badge { font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
     .Low { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
-    .Medium { background: rgba(234, 179, 8, 0.15); color: #fbbf24; border: 1px solid rgba(234, 179, 8, 0.3); }
     .High { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-
-    .High-Traffic { filter: hue-rotate(90deg) brightness(1.2); }
 
     .map-wrap{flex:1;position:relative;min-width:0;}
     #map{width:100%;height:100%;}
 
-    .map-hint{
-      position:absolute;top:12px;left:50%;transform:translateX(-50%);
-      z-index:10;padding:7px 16px;border-radius:999px;
-      background:var(--panel);border:1px solid var(--border);
-      font-size:0.78rem;color:var(--muted);white-space:nowrap;
-      pointer-events:none; backdrop-filter: blur(4px);
-    }
-
-    /* ── STOP POPUP STYLING ── */
     .sp { min-width: 170px; padding: 2px; }
     .sp-title { font-size: 0.95rem; font-weight: 800; margin-bottom: 10px; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
     .sp-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 0.85rem; }
     .sp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .sp-bus { flex: 1; font-weight: 500; color: #475569; }
     .sp-time { font-weight: 800; color: #0284c7; }
-    .sp-note { font-size: 0.7rem; color: #94a3b8; margin-top: -4px; margin-left: 16px; margin-bottom: 4px; }
 
-    .leaflet-popup-content-wrapper { border-radius: 12px !important; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1) !important; }
-    .leaflet-popup-tip { display: none; }
-
-    footer{
-      height:36px;padding:0 18px;
-      background:var(--panel);border-top:1px solid var(--border);
-      display:flex;align-items:center;gap:20px;
-      font-size:0.72rem;color:var(--muted);flex-shrink:0;
+    /* ── MOBILE OPTIMIZATIONS ── */
+    @media (max-width: 480px) {
+      header { padding: 0 10px; gap: 5px; }
+      .header-left { gap: 8px; }
+      .brand-sub { display: none !important; } /* Remove crowded text */
+      .brand-name { font-size: 0.95rem; }
+      .pill-btn, .net-badge { padding: 5px 8px; font-size: 0.7rem; }
     }
-    footer b{color:var(--text);}
+
+    footer{ height:36px; padding:0 18px; background:var(--panel); border-top:1px solid var(--border); display:flex; align-items:center; gap:20px; font-size:0.72rem; color:var(--muted); flex-shrink:0; }
     .bm{width:34px;height:34px;display:flex;align-items:center;justify-content:center;transform-origin:center;}
   </style>
 </head>
@@ -204,12 +168,10 @@
         </div>
       </div>
     </div>
-
     <button class="sidebar-toggle" id="sb-toggle">›</button>
-
     <div class="map-wrap">
       <div id="map"></div>
-      <div class="map-hint">● Click any stop for live ETA popups</div>
+      <div class="map-hint">● Click stops for live ETA popups</div>
     </div>
   </div>
 
@@ -225,39 +187,22 @@ const API = "https://technobots-bus-tracker.onrender.com";
 
 const ROUTES = {
   bus_1:{
-    label:"Bus A",
-    name:"Gate → Library → E-Block",
-    color:"#38bdf8",
-    path:[
-      [17.3912, 78.3190], [17.3915, 78.3185], [17.3918, 78.3180], 
-      [17.3922, 78.3178], [17.3928, 78.3175], [17.3935, 78.3172]
-    ],
-    stops:[ {n:"Main Gate", i:0}, {n:"Library", i:3}, {n:"E-Block", i:5} ]
+    label:"Bus A", name:"Gate → Library → E-Block", color:"#38bdf8",
+    path:[[17.3912, 78.3190], [17.3915, 78.3185], [17.3918, 78.3180], [17.3922, 78.3178], [17.3928, 78.3175], [17.3935, 78.3172]],
+    stops:[{n:"Main Gate", i:0}, {n:"Library", i:3}, {n:"E-Block", i:5}]
   },
   bus_2:{
-    label:"Bus B",
-    name:"Gate → ECE → Sports",
-    color:"#f472b6",
-    path:[
-      [17.3912, 78.3190], [17.3908, 78.3195], [17.3902, 78.3200], 
-      [17.3895, 78.3205], [17.3890, 78.3210]
-    ],
-    stops:[ {n:"Main Gate", i:0}, {n:"ECE Block", i:2}, {n:"Sports Court", i:4} ]
+    label:"Bus B", name:"Gate → ECE → Sports", color:"#f472b6",
+    path:[[17.3912, 78.3190], [17.3908, 78.3195], [17.3902, 78.3200], [17.3895, 78.3205], [17.3890, 78.3210]],
+    stops:[{n:"Main Gate", i:0}, {n:"ECE Block", i:2}, {n:"Sports Court", i:4}]
   }
 };
 
 const map = L.map("map",{zoomControl:false}).setView([17.3912, 78.3190], 17);
 let tile = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {maxZoom:19}).addTo(map);
 
-let isDark = true;
-let sbOpen = true;
-let selBus = null;
-let isFollowing = false;
-let markers = {};
-let etaCache = {};
-let apiBuses = {};
-let pathIdx = {bus_1:0, bus_2:0};
-let animID = {};
+let isDark = true, sbOpen = true, selBus = null, isFollowing = false;
+let markers = {}, etaCache = {}, apiBuses = {}, pathIdx = {bus_1:0, bus_2:0}, animID = {};
 
 function setBadge(s){
   const b = document.getElementById("net-badge");
@@ -272,7 +217,6 @@ function renderSidebar(){
   list.innerHTML = ids.map(id => {
     const bus = apiBuses[id];
     const rd = ROUTES[id] || {label: id, name: "Unknown", color: "#38bdf8"};
-    const eta = etaCache[id];
     return `<button class="bus-card ${selBus===id?'active':''}" onclick="focusBus('${id}')">
       <div class="bc-top">
         <div class="bc-stripe" style="background:${rd.color}"></div>
@@ -290,28 +234,16 @@ async function pollBuses(){
     const r = await fetch(`${API}/buses?network=good`);
     const d = await r.json();
     apiBuses = d.buses || {};
-    renderSidebar();
-    setBadge("live");
+    renderSidebar(); setBadge("live");
   } catch { setBadge("offline"); }
-}
-
-async function pollETA(id){
-  try{
-    const r = await fetch(`${API}/eta?bus_id=${id}&stop_index=1`);
-    const d = await r.json();
-    etaCache[id] = d;
-    renderSidebar();
-  } catch{}
 }
 
 function drawRoutes(){
   for(const [id, r] of Object.entries(ROUTES)){
     L.polyline(r.path,{color:r.color, weight:6, opacity:0.4, lineCap:"round", lineJoin: "round"}).addTo(map);
     r.stops.forEach((s)=>{
-      const pos = r.path[s.i];
-      const cm = L.circleMarker(pos,{radius:8, color:r.color, fillColor:isDark?"#07111f":"#fff", fillOpacity:1, weight:3}).addTo(map);
+      const cm = L.circleMarker(r.path[s.i],{radius:8, color:r.color, fillColor:isDark?"#07111f":"#fff", fillOpacity:1, weight:3}).addTo(map);
       cm.bindTooltip(`<b>${s.n}</b>`, {direction: "top", offset: [0, -5]});
-
       cm.on("click", async () => {
         cm.bindPopup(`<div class="sp"><div class="sp-title">${s.n}</div><div style="font-size:0.8rem;">📡 Fetching live ETAs...</div></div>`, {closeButton:false}).openPopup();
         let rows = [];
@@ -319,11 +251,11 @@ function drawRoutes(){
             try {
                 const res = await fetch(`${API}/eta?bus_id=${bid}&stop_index=${s.i}&network=good`);
                 const d = await res.json();
-                rows.push({label: ROUTES[bid].label, color: ROUTES[bid].color, eta: d.eta_minutes, note: d.condition});
+                rows.push({label: ROUTES[bid].label, color: ROUTES[bid].color, eta: d.eta_minutes});
             } catch { rows.push({label: ROUTES[bid].label, color: ROUTES[bid].color, eta: "—"}); }
         }
         cm.setPopupContent(`<div class="sp"><div class="sp-title">${s.n}</div>` + 
-            rows.map(row => `<div class="sp-row"><span class="sp-dot" style="background:${row.color}"></span><span class="sp-bus">${row.label}</span><span class="sp-time">${typeof row.eta==='number'?row.eta+' min':row.eta}</span></div>${row.note?`<div class="sp-note">${row.note}</div>`:''}`).join("") + `</div>`);
+            rows.map(row => `<div class="sp-row"><span class="sp-dot" style="background:${row.color}"></span><span class="sp-bus">${row.label}</span><span class="sp-time">${typeof row.eta==='number'?row.eta+' min':row.eta}</span></div>`).join("") + `</div>`);
       });
     });
   }
@@ -344,24 +276,15 @@ function moveBus(id){
   let nxt = (idx + 1 >= path.length) ? 0 : idx + 1;
   const from = path[idx], to = path[nxt];
   const deg = hdg(from, to);
-  
   const DUR = 10000; // SLOW: 10 seconds per segment
   const t0 = performance.now();
 
   if(animID[id]) cancelAnimationFrame(animID[id]);
-
   function step(now){
     const p = Math.min((now - t0) / DUR, 1);
-    const lat = from[0] + (to[0] - from[0]) * p;
-    const lng = from[1] + (to[1] - from[1]) * p;
-    if(!markers[id]){
-      markers[id] = L.marker([lat, lng], {icon: busIcon(r.color, deg), zIndexOffset: 1000}).addTo(map);
-    } else {
-      markers[id].setLatLng([lat, lng]).setIcon(busIcon(r.color, deg));
-    }
-    if(apiBuses[id]?.occupancy === "High") markers[id]._icon.classList.add("High-Traffic");
-    else if(markers[id]._icon) markers[id]._icon.classList.remove("High-Traffic");
-
+    const lat = from[0] + (to[0] - from[0]) * p, lng = from[1] + (to[1] - from[1]) * p;
+    if(!markers[id]) markers[id] = L.marker([lat, lng], {icon: busIcon(r.color, deg), zIndexOffset: 1000}).addTo(map);
+    else markers[id].setLatLng([lat, lng]).setIcon(busIcon(r.color, deg));
     if(p < 1) animID[id] = requestAnimationFrame(step);
     else { pathIdx[id] = nxt; setTimeout(() => moveBus(id), 500); }
   }
@@ -382,17 +305,13 @@ document.getElementById("theme-btn").addEventListener("click",()=>{
   tile = L.tileLayer(isDark ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
 });
 
-const sbEl = document.getElementById("sidebar");
-const sbBtn = document.getElementById("sb-toggle");
-const menuBtn = document.getElementById("menu-toggle");
-
+const sbEl = document.getElementById("sidebar"), sbBtn = document.getElementById("sb-toggle"), menuBtn = document.getElementById("menu-toggle");
 function toggleSidebar() {
   sbOpen = !sbOpen;
   sbEl.classList.toggle("closed", !sbOpen);
   if(sbBtn) sbBtn.style.left = sbOpen ? "300px" : "0";
   setTimeout(() => map.invalidateSize(), 300);
 }
-
 if(menuBtn) menuBtn.addEventListener("click", toggleSidebar);
 if(sbBtn) sbBtn.addEventListener("click", toggleSidebar);
 
@@ -400,8 +319,6 @@ setInterval(() => {
   pollBuses();
   if(isFollowing && selBus && markers[selBus]) map.panTo(markers[selBus].getLatLng());
 }, 2000);
-
-setInterval(() => { pollETA("bus_1"); pollETA("bus_2"); }, 5000);
 
 drawRoutes();
 moveBus("bus_1");
