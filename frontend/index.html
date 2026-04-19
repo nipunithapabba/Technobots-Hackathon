@@ -314,52 +314,64 @@ function busIcon(color, deg){
 
 function hdg(a,b){ return (Math.atan2(b[1]-a[1], b[0]-a[0])*180/Math.PI-90+360)%360; }
 
+/* ── Smooth road-following animation (LOOPING VERSION) ── */
 function moveBus(id){
   const r = ROUTES[id];
   if(!r) return;
   const path = r.path;
   let idx = pathIdx[id];
-  let dir = pathDir[id];
 
-  let nxt = idx + dir;
-  if(nxt >= path.length) { nxt = path.length-2; dir = -1; }
-  if(nxt < 0) { nxt = 1; dir = 1; }
-  pathDir[id] = dir;
+  // Logic to LOOP (Go 0 -> 1 -> 2 -> End -> 0)
+  // This now matches your backend simulator logic perfectly
+  let nxt = idx + 1; 
+  if(nxt >= path.length) { 
+      nxt = 0; 
+  }
 
   const from = path[idx], to = path[nxt];
   const deg = hdg(from, to);
-  const DUR = 2100;
+  
+  /* DUR = 5000 (5 seconds). 
+    This slows down the "glide" between waypoints so it doesn't look like a race car.
+  */
+  const DUR = 5000; 
   const t0 = performance.now();
 
+  if(animID[id]) cancelAnimationFrame(animID[id]);
+
   function step(now){
-    const p = Math.min((now-t0)/DUR, 1);
-    const lat = from[0]+(to[0]-from[0])*p;
-    const lng = from[1]+(to[1]-from[1])*p;
+    const p = Math.min((now - t0) / DUR, 1);
+    
+    // Smooth interpolation
+    const lat = from[0] + (to[0] - from[0]) * p;
+    const lng = from[1] + (to[1] - from[1]) * p;
 
     if(!markers[id]){
-      markers[id] = L.marker([lat,lng],{icon:busIcon(r.color, deg)}).addTo(map);
+      markers[id] = L.marker([lat, lng], {icon: busIcon(r.color, deg), zIndexOffset: 1000}).addTo(map);
+      markers[id].bindTooltip(`<b>${r.label}</b>`, {direction: "top"});
     } else {
-      markers[id].setLatLng([lat,lng]);
+      markers[id].setLatLng([lat, lng]);
+      // Update rotation arrow
       markers[id].setIcon(busIcon(r.color, deg));
     }
 
-    if(apiBuses[id]?.occupancy === "High") markers[id]._icon.classList.add("High-Traffic");
-    else if(markers[id]._icon) markers[id]._icon.classList.remove("High-Traffic");
+    // Apply High Traffic filter if occupancy is high
+    if(apiBuses[id]?.occupancy === "High") {
+        if(markers[id]._icon) markers[id]._icon.classList.add("High-Traffic");
+    } else if (markers[id]._icon) {
+        markers[id]._icon.classList.remove("High-Traffic");
+    }
 
-    if(p<1) animID[id] = requestAnimationFrame(step);
-    else { pathIdx[id] = nxt; setTimeout(()=>moveBus(id), 100); }
+    if(p < 1) {
+      animID[id] = requestAnimationFrame(step);
+    } else {
+      // Move to the next waypoint
+      pathIdx[id] = nxt; 
+      // Small pause (200ms) at the waypoint before starting the next segment
+      setTimeout(() => moveBus(id), 200); 
+    }
   }
   animID[id] = requestAnimationFrame(step);
-}
-
-async function pollBuses(){
-  try{
-    const r = await fetch(`${API}/buses?network=good`);
-    const d = await r.json();
-    apiBuses = d.buses || {};
-    renderSidebar();
-    setBadge("live");
-  } catch { setBadge("offline"); }
 }
 
 async function pollETA(id){

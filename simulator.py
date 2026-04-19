@@ -7,9 +7,8 @@ from routes import ROUTES
 # Tracks current state of each bus
 # Note: "route" must match the keys in routes.py ("bus_1", "bus_2")
 bus_state = {
-    # Speed reduced from 0.01 to 0.002 (5x slower)
-    "bus_1": {"route": "bus_1", "stop_index": 0, "progress": 0.0, "speed": 0.002},
-    "bus_2": {"route": "bus_2", "stop_index": 0, "progress": 0.0, "speed": 0.0015},
+    "bus_1": {"route": "bus_1", "stop_index": 0, "progress": 0.0, "speed": 0.0005},
+    "bus_2": {"route": "bus_2", "stop_index": 0, "progress": 0.0, "speed": 0.0004},
 }
 
 def interpolate(stop_a, stop_b, progress):
