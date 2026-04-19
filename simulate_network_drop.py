@@ -11,7 +11,7 @@ for i in range(3):
     r = requests.get(f"{BASE}/buses?network=good")
     buses = r.json()["buses"]
     bus1 = buses["bus_1"]
-    print(f"  Ping {i+1}: bus_1 at ({bus1['lat']}, {bus1['lng']})")
+    print(f"   Ping {i+1}: bus_1 is at ({bus1['lat']}, {bus1['lng']}) | {bus1['occupancy']} Load | {bus1['weather']}")
     time.sleep(1)
 
 print("\n🔴 Phase 2: Client goes OFFLINE (5 seconds)")

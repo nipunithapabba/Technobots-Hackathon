@@ -34,8 +34,11 @@ try:
     bus = data["buses"]["bus_1"]
     test("bus_1 has lat", "lat" in bus)
     test("bus_1 has lng", "lng" in bus)
+    test("bus_1 has occupancy", "occupancy" in bus)
+    test("bus_1 has weather", "weather" in bus)
     test("bus_1 has route_name", "route_name" in bus)
     test("bus_1 has next_stop", "next_stop" in bus)
+    print(f"     [Data Check] Occupancy: {bus['occupancy']} | Weather: {bus['weather']}")
 except Exception as e:
     print(f"  {FAIL} Error: {e}")
 
@@ -58,9 +61,14 @@ try:
     data = r.json()
     test("Status 200", r.status_code == 200)
     test("Has routes key", "routes" in data)
-    test("Has route_1", "route_1" in data["routes"])
-    test("Has route_2", "route_2" in data["routes"])
-    stops = data["routes"]["route_1"]["stops"]
+    
+    # CHANGE THESE TWO LINES:
+    test("Has bus_1", "bus_1" in data["routes"]) 
+    test("Has bus_2", "bus_2" in data["routes"]) 
+    
+    # CHANGE THIS LINE TOO:
+    stops = data["routes"]["bus_1"]["stops"] 
+    
     test("Route 1 has stops", len(stops) > 0)
     test("Each stop has lat/lng", "lat" in stops[0] and "lng" in stops[0])
 except Exception as e:

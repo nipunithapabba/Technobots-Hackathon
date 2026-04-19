@@ -53,15 +53,15 @@ def get_buses(network: str = Query(default="good")):
     positions = get_bus_positions()
 
     if network == "poor":
-        # Low bandwidth mode — send only essential fields
-        minimal = {}
-        for bus_id, data in positions.items():
-            minimal[bus_id] = {
-                "bus_id": data["bus_id"],
-                "lat": data["lat"],
-                "lng": data["lng"]
-            }
-        return {"mode": "low_bandwidth", "buses": minimal}
+            minimal = {}
+            for bus_id, data in positions.items():
+                minimal[bus_id] = {
+                    "bus_id": data["bus_id"],
+                    "lat": data["lat"],
+                    "lng": data["lng"],
+                    "occupancy": data.get("occupancy", "Low") # Add this
+                }
+            return {"mode": "low_bandwidth", "buses": minimal}
 
     # Full data for good network
     return {"mode": "full", "buses": positions}
