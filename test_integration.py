@@ -70,7 +70,7 @@ try:
     stops = data["routes"]["bus_1"]["stops"] 
     
     test("Route 1 has stops", len(stops) > 0)
-    test("Each stop has lat/lng", "lat" in stops[0] and "lng" in stops[0])
+    test("Each stop has index", "index" in stops[0]) # Instead of "lat" in stops[0]
 except Exception as e:
     print(f"  {FAIL} Error: {e}")
 
