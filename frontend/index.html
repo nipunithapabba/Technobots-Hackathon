@@ -238,42 +238,34 @@
 <script>
 const API = "https://technobots-bus-tracker.onrender.com";
 
+/* --- Replace the ROUTES object in your HTML --- */
 const ROUTES = {
-  bus_1: {
-    label: "Bus A",
-    name: "Main Gate → Library → Hostel",
-    color: "#38bdf8",
-    // These points now follow the actual curves of the CBIT roads
-    path: [
-      [17.3917, 78.3262], [17.3915, 78.3255], [17.3912, 78.3248], // Entrance road
-      [17.3914, 78.3242], [17.3918, 78.3238], [17.3925, 78.3235], // Turning at the circle
-      [17.3930, 78.3232], [17.3938, 78.3230], [17.3945, 78.3228]  // Road to Library
+  bus_1:{
+    label:"Bus A",
+    name:"Gate → Library → E-Block",
+    color:"#38bdf8",
+    path:[
+      [17.3912, 78.3190], [17.3915, 78.3185], [17.3918, 78.3180], 
+      [17.3922, 78.3178], [17.3928, 78.3175], [17.3935, 78.3172]
     ],
-    stops: [
-      {n: "Main Gate", i: 0}, 
-      {n: "Admin Block", i: 4}, 
-      {n: "Library", i: 8}
-    ]
+    stops:[ {n:"Main Gate", i:0}, {n:"Library", i:3}, {n:"E-Block", i:5} ]
   },
-  bus_2: {
-    label: "Bus B",
-    name: "Main Gate → ECE → Sports",
-    color: "#f472b6",
-    path: [
-      [17.3917, 78.3262], [17.3910, 78.3265], [17.3905, 78.3268], // Heading South
-      [17.3900, 78.3272], [17.3895, 78.3278], [17.3890, 78.3285], // Curve around ECE
-      [17.3885, 78.3292], [17.3880, 78.3300]                      // To Sports Ground
+  bus_2:{
+    label:"Bus B",
+    name:"Gate → ECE → Sports",
+    color:"#f472b6",
+    path:[
+      [17.3912, 78.3190], [17.3908, 78.3195], [17.3902, 78.3200], 
+      [17.3915, 78.3185], [17.3895, 78.3205], [17.3890, 78.3210]
     ],
-    stops: [
-      {n: "Main Gate", i: 0}, 
-      {n: "ECE Labs", i: 4}, 
-      {n: "Sports Ground", i: 7}
-    ]
+    stops:[ {n:"Main Gate", i:0}, {n:"ECE Block", i:2}, {n:"Sports Court", i:4} ]
   }
 };
 
-const map = L.map("map",{zoomControl:false}).setView([17.3850, 78.4867], 16);
-L.control.zoom({position:"bottomright"}).addTo(map);
+/* --- Update your Map Setup Line --- */
+// This centers the map on CBIT Gandipet
+const map = L.map("map",{zoomControl:false}).setView([17.3912, 78.3190], 17);
+
 
 let tile = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {maxZoom:19}).addTo(map);
 
