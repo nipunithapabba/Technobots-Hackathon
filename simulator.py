@@ -7,9 +7,12 @@ from routes import ROUTES
 # Tracks current state of each bus
 # Note: "route" must match the keys in routes.py ("bus_1", "bus_2")
 bus_state = {
-    "bus_1": {"route": "bus_1", "stop_index": 0, "progress": 0.0, "speed": 0.0005},
-    "bus_2": {"route": "bus_2", "stop_index": 0, "progress": 0.0, "speed": 0.0004},
+    # 0.0001 is 5 times slower than 0.0005. 
+    # This makes the bus take much longer to move between waypoints.
+    "bus_1": {"route": "bus_1", "stop_index": 0, "progress": 0.0, "speed": 0.0001},
+    "bus_2": {"route": "bus_2", "stop_index": 0, "progress": 0.0, "speed": 0.00008},
 }
+
 
 def interpolate(stop_a, stop_b, progress):
     """Calculate a position between two points based on progress (0.0 to 1.0)"""

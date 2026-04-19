@@ -180,7 +180,6 @@
     footer b{color:var(--text);}
 
     .bm{width:34px;height:34px;display:flex;align-items:center;justify-content:center;transform-origin:center;}
-
     .sp{min-width:190px;font-family:Inter,'Segoe UI',sans-serif;}
     .sp-title{font-size:0.88rem;font-weight:700;color:#0f172a;margin-bottom:8px;}
     .sp-row{display:grid;grid-template-columns:8px 1fr auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid #e2e8f0;font-size:0.8rem;}
@@ -238,7 +237,6 @@
 <script>
 const API = "https://technobots-bus-tracker.onrender.com";
 
-/* --- Replace the ROUTES object in your HTML --- */
 const ROUTES = {
   bus_1:{
     label:"Bus A",
@@ -262,11 +260,7 @@ const ROUTES = {
   }
 };
 
-/* --- Update your Map Setup Line --- */
-// This centers the map on CBIT Gandipet
 const map = L.map("map",{zoomControl:false}).setView([17.3912, 78.3190], 17);
-
-
 let tile = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {maxZoom:19}).addTo(map);
 
 let isDark = true;
@@ -277,29 +271,61 @@ let markers = {};
 let etaCache = {};
 let apiBuses = {};
 let pathIdx = {bus_1:0, bus_2:0};
-let pathDir = {bus_1:1, bus_2:1};
 let animID = {};
+
+function setBadge(s){
+  const b = document.getElementById("net-badge");
+  b.style.background = s==="live"?"#16a34a":"#dc2626";
+  b.innerHTML = s==="live"?"● Live":"● Offline";
+}
+
+function renderSidebar(){
+  const list = document.getElementById("bus-list");
+  const ids = Object.keys(apiBuses);
+  document.getElementById("bus-count").textContent = ids.length;
+  list.innerHTML = ids.map(id => {
+    const bus = apiBuses[id];
+    const rd = ROUTES[id] || {label: id, name: "Unknown", color: "#38bdf8"};
+    const eta = etaCache[id];
+    return `<button class="bus-card ${selBus===id?'active':''}" onclick="focusBus('${id}')">
+      <div class="bc-top">
+        <div class="bc-stripe" style="background:${rd.color}"></div>
+        <div class="bc-info"><div class="bc-name">${rd.label}</div><div class="bc-route">${rd.name}</div></div>
+        <div class="occ-badge ${bus.occupancy}">${bus.occupancy}</div>
+      </div>
+      <div class="bc-row"><span>Next</span><strong>${bus.next_stop || "—"}</strong></div>
+      <div class="bc-row"><span>Weather</span><strong>${bus.weather || "—"}</strong></div>
+      ${eta ? `<div class="bc-eta"><span>ETA</span><b>${eta.eta_minutes} min</b></div>`:''}
+    </button>`;
+  }).join("");
+}
+
+async function pollBuses(){
+  try{
+    const r = await fetch(`${API}/buses?network=good`);
+    const d = await r.json();
+    apiBuses = d.buses || {};
+    renderSidebar();
+    setBadge("live");
+  } catch { setBadge("offline"); }
+}
+
+async function pollETA(id){
+  try{
+    const r = await fetch(`${API}/eta?bus_id=${id}&stop_index=1`);
+    const d = await r.json();
+    etaCache[id] = d;
+    renderSidebar();
+  } catch{}
+}
 
 function drawRoutes(){
   for(const [id, r] of Object.entries(ROUTES)){
     L.polyline(r.path,{color:r.color, weight:6, opacity:0.5, lineCap:"round", lineJoin: "round"}).addTo(map);
-    r.stops.forEach((s, si)=>{
+    r.stops.forEach((s)=>{
       const pos = r.path[s.i];
       const cm = L.circleMarker(pos,{radius:7, color:r.color, fillColor:isDark?"#07111f":"#fff", fillOpacity:1, weight:2}).addTo(map);
       cm.bindTooltip(`<b>${s.n}</b>`);
-      cm.on("click", async () => {
-        cm.bindPopup(`<div class="sp">Fetching ETAs...</div>`).openPopup();
-        let rows = [];
-        for(const bid of Object.keys(ROUTES)){
-            try {
-                const res = await fetch(`${API}/eta?bus_id=${bid}&stop_index=${s.i}&network=good`);
-                const d = await res.json();
-                rows.push({label: ROUTES[bid].label, color: ROUTES[bid].color, eta: d.eta_minutes});
-            } catch { rows.push({label: ROUTES[bid].label, color: ROUTES[bid].color, eta: "—"}); }
-        }
-        cm.setPopupContent(`<div class="sp"><div class="sp-title">${s.n}</div>` + 
-            rows.map(r => `<div class="sp-row"><span class="sp-dot" style="background:${r.color}"></span><span>${r.label}</span><b>${r.eta} min</b></div>`).join("") + `</div>`);
-      });
     });
   }
 }
@@ -311,106 +337,40 @@ function busIcon(color, deg){
 
 function hdg(a,b){ return (Math.atan2(b[1]-a[1], b[0]-a[0])*180/Math.PI-90+360)%360; }
 
-/* ── Smooth road-following animation (LOOPING VERSION) ── */
 function moveBus(id){
   const r = ROUTES[id];
   if(!r) return;
   const path = r.path;
   let idx = pathIdx[id];
-
-  // Logic to LOOP (Go 0 -> 1 -> 2 -> End -> 0)
-  // This now matches your backend simulator logic perfectly
-  let nxt = idx + 1; 
-  if(nxt >= path.length) { 
-      nxt = 0; 
-  }
+  let nxt = (idx + 1 >= path.length) ? 0 : idx + 1;
 
   const from = path[idx], to = path[nxt];
   const deg = hdg(from, to);
   
-  /* DUR = 5000 (5 seconds). 
-    This slows down the "glide" between waypoints so it doesn't look like a race car.
-  */
-  const DUR = 5000; 
+  // SLOW SPEED: 10000ms (10 seconds) per road segment
+  const DUR = 10000; 
   const t0 = performance.now();
 
   if(animID[id]) cancelAnimationFrame(animID[id]);
 
   function step(now){
     const p = Math.min((now - t0) / DUR, 1);
-    
-    // Smooth interpolation
     const lat = from[0] + (to[0] - from[0]) * p;
     const lng = from[1] + (to[1] - from[1]) * p;
 
     if(!markers[id]){
       markers[id] = L.marker([lat, lng], {icon: busIcon(r.color, deg), zIndexOffset: 1000}).addTo(map);
-      markers[id].bindTooltip(`<b>${r.label}</b>`, {direction: "top"});
     } else {
-      markers[id].setLatLng([lat, lng]);
-      // Update rotation arrow
-      markers[id].setIcon(busIcon(r.color, deg));
+      markers[id].setLatLng([lat, lng]).setIcon(busIcon(r.color, deg));
     }
 
-    // Apply High Traffic filter if occupancy is high
-    if(apiBuses[id]?.occupancy === "High") {
-        if(markers[id]._icon) markers[id]._icon.classList.add("High-Traffic");
-    } else if (markers[id]._icon) {
-        markers[id]._icon.classList.remove("High-Traffic");
-    }
+    if(apiBuses[id]?.occupancy === "High") markers[id]._icon.classList.add("High-Traffic");
+    else if(markers[id]._icon) markers[id]._icon.classList.remove("High-Traffic");
 
-    if(p < 1) {
-      animID[id] = requestAnimationFrame(step);
-    } else {
-      // Move to the next waypoint
-      pathIdx[id] = nxt; 
-      // Small pause (200ms) at the waypoint before starting the next segment
-      setTimeout(() => moveBus(id), 200); 
-    }
+    if(p < 1) animID[id] = requestAnimationFrame(step);
+    else { pathIdx[id] = nxt; setTimeout(() => moveBus(id), 500); }
   }
   animID[id] = requestAnimationFrame(step);
-}
-
-async function pollETA(id){
-  try{
-    const r = await fetch(`${API}/eta?bus_id=${id}&stop_index=1`);
-    const d = await r.json();
-    etaCache[id] = d;
-    if(d.eta_minutes <= 1 && navigator.vibrate) navigator.vibrate([200, 100, 200]);
-    renderSidebar();
-  } catch{}
-}
-
-function renderSidebar(){
-  const list = document.getElementById("bus-list");
-  const ids = Object.keys(apiBuses);
-  document.getElementById("bus-count").textContent = ids.length;
-
-  if(ids.length === 0){
-    list.innerHTML = `<div style="color:var(--muted);font-size:0.82rem;padding:8px 0;">📡 Waiting for bus data...</div>`;
-    return;
-  }
-
-  list.innerHTML = ids.map(id => {
-    const bus = apiBuses[id];
-    // Check if we have a match in our local ROUTES object
-    const rd = ROUTES[id] || {label: id, name: bus.route_name || "Unknown Route", color: "#38bdf8"};
-    const eta = etaCache[id];
-    
-    return `<button class="bus-card ${selBus===id?'active':''}" onclick="focusBus('${id}')">
-      <div class="bc-top">
-        <div class="bc-stripe" style="background:${rd.color}"></div>
-        <div class="bc-info">
-          <div class="bc-name">${rd.label}</div>
-          <div class="bc-route">${rd.name}</div>
-        </div>
-        <div class="occ-badge ${bus.occupancy || 'Low'}">${bus.occupancy || 'Low'}</div>
-      </div>
-      <div class="bc-row"><span>Next stop</span><strong>${bus.next_stop || "—"}</strong></div>
-      <div class="bc-row"><span>Weather</span><strong>${bus.weather || "Clear"}</strong></div>
-      ${eta ? `<div class="bc-eta"><span>ETA</span><b>${eta.eta_minutes} min</b></div>` : ""}
-    </button>`;
-  }).join("");
 }
 
 function focusBus(id){
@@ -420,12 +380,6 @@ function focusBus(id){
   renderSidebar();
 }
 
-function setBadge(s){
-  const b = document.getElementById("net-badge");
-  b.style.background = s==="live"?"#16a34a":"#dc2626";
-  b.innerHTML = s==="live"?"● Live":"● Offline";
-}
-
 document.getElementById("theme-btn").addEventListener("click",()=>{
   isDark = !isDark;
   document.body.classList.toggle("bright", !isDark);
@@ -433,7 +387,6 @@ document.getElementById("theme-btn").addEventListener("click",()=>{
   tile = L.tileLayer(isDark ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
 });
 
-/* ── Sidebar & Menu Toggle Logic ── */
 const sbEl = document.getElementById("sidebar");
 const sbBtn = document.getElementById("sb-toggle");
 const menuBtn = document.getElementById("menu-toggle");
@@ -441,10 +394,7 @@ const menuBtn = document.getElementById("menu-toggle");
 function toggleSidebar() {
   sbOpen = !sbOpen;
   sbEl.classList.toggle("closed", !sbOpen);
-  if(sbBtn) {
-    sbBtn.style.left = sbOpen ? "300px" : "0";
-    sbBtn.innerHTML = sbOpen ? "›" : "‹";
-  }
+  if(sbBtn) sbBtn.style.left = sbOpen ? "300px" : "0";
   setTimeout(() => map.invalidateSize(), 300);
 }
 
