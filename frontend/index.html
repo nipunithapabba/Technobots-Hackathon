@@ -44,6 +44,8 @@
       flex-shrink:0;z-index:100;
     }
 
+    .header-left { display: flex; align-items: center; gap: 15px; }
+
     .brand{display:flex;flex-direction:column;gap:1px;}
     .brand-sub{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--accent);font-weight:700;}
     .brand-name{font-size:1.15rem;font-weight:700;color:var(--text);}
@@ -144,7 +146,6 @@
     }
     .bc-eta b{color:var(--accent);font-size:1rem;}
 
-    /* ── OCCUPANCY BADGES ── */
     .occ-badge {
         font-size: 0.65rem;
         padding: 2px 8px;
@@ -196,9 +197,12 @@
 <body>
 <div class="app">
   <header>
-    <div class="brand">
-      <span class="brand-sub">Campus Transit</span>
-      <span class="brand-name">🚌 CampusCruise</span>
+    <div class="header-left">
+      <button class="pill-btn" id="menu-toggle" style="padding: 5px 10px; font-size: 1.1rem;">☰</button>
+      <div class="brand">
+        <span class="brand-sub">Campus Transit</span>
+        <span class="brand-name">🚌 CampusCruise</span>
+      </div>
     </div>
     <div class="header-right">
       <button class="pill-btn" id="theme-btn">☀ Bright</button>
@@ -234,7 +238,6 @@
 <script>
 const API = "https://technobots-bus-tracker.onrender.com";
 
-// Updated to match the Backend Waypoints exactly
 const ROUTES = {
   bus_1:{
     label:"Bus A",
@@ -270,6 +273,7 @@ L.control.zoom({position:"bottomright"}).addTo(map);
 let tile = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {maxZoom:19}).addTo(map);
 
 let isDark = true;
+let sbOpen = true;
 let selBus = null;
 let isFollowing = false;
 let markers = {};
@@ -339,7 +343,6 @@ function moveBus(id){
       markers[id].setIcon(busIcon(r.color, deg));
     }
 
-    // Apply High Traffic filter
     if(apiBuses[id]?.occupancy === "High") markers[id]._icon.classList.add("High-Traffic");
     else if(markers[id]._icon) markers[id]._icon.classList.remove("High-Traffic");
 
@@ -409,6 +412,24 @@ document.getElementById("theme-btn").addEventListener("click",()=>{
   map.removeLayer(tile);
   tile = L.tileLayer(isDark ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
 });
+
+/* ── Sidebar & Menu Toggle Logic ── */
+const sbEl = document.getElementById("sidebar");
+const sbBtn = document.getElementById("sb-toggle");
+const menuBtn = document.getElementById("menu-toggle");
+
+function toggleSidebar() {
+  sbOpen = !sbOpen;
+  sbEl.classList.toggle("closed", !sbOpen);
+  if(sbBtn) {
+    sbBtn.style.left = sbOpen ? "300px" : "0";
+    sbBtn.innerHTML = sbOpen ? "›" : "‹";
+  }
+  setTimeout(() => map.invalidateSize(), 300);
+}
+
+if(menuBtn) menuBtn.addEventListener("click", toggleSidebar);
+if(sbBtn) sbBtn.addEventListener("click", toggleSidebar);
 
 setInterval(() => {
   pollBuses();
