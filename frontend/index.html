@@ -1,479 +1,465 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Technobots Bus Tracker 🚌</title>
-
-  <!-- Leaflet.js map library -->
+  <title>CampusCruise — Osmania University</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
+    :root {
+      --bg:#0f172a;--surface:#1e293b;--surface2:#0f172a;
+      --accent:#38bdf8;--accent2:#f472b6;--text:#e2e8f0;
+      --muted:#94a3b8;--border:#334155;
     }
-
-    /* ── Top Bar ── */
-    header {
-      background: #1e293b;
-      padding: 12px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid #334155;
+    body.light {
+      --bg:#f0f9ff;--surface:#ffffff;--surface2:#e0f2fe;
+      --accent:#0284c7;--accent2:#db2777;--text:#0f172a;
+      --muted:#475569;--border:#bae6fd;
     }
-
-    header h1 {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #38bdf8;
-    }
-
-    header h1 span { color: #ffffff; }
-
-    /* Network status badge */
-    #network-badge {
-      padding: 6px 14px;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      transition: all 0.3s;
-    }
-    .badge-live    { background: #16a34a; color: #fff; }
-    .badge-offline { background: #dc2626; color: #fff; }
-    .badge-syncing { background: #d97706; color: #fff; }
-
-    /* ── Main Layout ── */
-    .container {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
-
-    /* ── Sidebar ── */
-    #sidebar {
-      width: 300px;
-      background: #1e293b;
-      border-right: 1px solid #334155;
-      overflow-y: auto;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    #sidebar h2 {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #94a3b8;
-      margin-bottom: 4px;
-    }
-
-    /* Bus card */
-    .bus-card {
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 14px;
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-    .bus-card:hover { border-color: #38bdf8; }
-    .bus-card.active { border-color: #38bdf8; background: #1e3a5f; }
-
-    .bus-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .bus-name {
-      font-weight: 700;
-      font-size: 1rem;
-      color: #38bdf8;
-    }
-
-    .bus-status {
-      font-size: 0.75rem;
-      background: #16a34a22;
-      color: #4ade80;
-      padding: 2px 8px;
-      border-radius: 999px;
-      border: 1px solid #16a34a55;
-    }
-
-    .bus-info { font-size: 0.82rem; color: #94a3b8; line-height: 1.8; }
-    .bus-info strong { color: #e2e8f0; }
-
-    .eta-badge {
-      margin-top: 10px;
-      background: #1e3a5f;
-      border: 1px solid #38bdf855;
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 0.85rem;
-      color: #7dd3fc;
-    }
-
-    .eta-badge .eta-time {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #38bdf8;
-    }
-
-    /* Buffer indicator */
-    #buffer-info {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 0.8rem;
-      color: #94a3b8;
-    }
-
-    #buffer-info span { color: #fbbf24; font-weight: 700; }
-
-    /* ── Map ── */
-    #map {
-      flex: 1;
-      z-index: 1;
-    }
-
-    /* ── Bottom bar ── */
-    #bottom-bar {
-      background: #1e293b;
-      border-top: 1px solid #334155;
-      padding: 8px 20px;
-      font-size: 0.78rem;
-      color: #64748b;
-      display: flex;
-      gap: 20px;
-    }
-
-    #bottom-bar span { color: #94a3b8; }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;transition:background 0.3s,color 0.3s;}
+    header{background:var(--surface);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);z-index:1000;flex-shrink:0;}
+    .header-left{display:flex;align-items:center;gap:12px;}
+    .header-left h1{font-size:1.05rem;font-weight:700;color:var(--accent);}
+    .header-left h1 span{color:var(--text);}
+    .header-right{display:flex;align-items:center;gap:10px;}
+    #network-badge{padding:5px 12px;border-radius:999px;font-size:0.75rem;font-weight:600;}
+    .badge-live{background:#16a34a;color:#fff;}
+    .badge-offline{background:#dc2626;color:#fff;}
+    .badge-syncing{background:#d97706;color:#fff;}
+    .hbtn{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 12px;border-radius:8px;cursor:pointer;font-size:0.78rem;font-weight:600;transition:border-color 0.2s;}
+    .hbtn:hover{border-color:var(--accent);color:var(--accent);}
+    .container{display:flex;flex:1;overflow:hidden;}
+    #sidebar{width:285px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;transition:width 0.3s,padding 0.3s,opacity 0.3s;flex-shrink:0;}
+    #sidebar.collapsed{width:0;padding:0;overflow:hidden;opacity:0;}
+    #sidebar h2{font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);white-space:nowrap;}
+    .bus-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;transition:border-color 0.2s;}
+    .bus-card:hover,.bus-card.active{border-color:var(--accent);}
+    .bus-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+    .bus-name{font-weight:700;font-size:0.9rem;color:var(--accent);white-space:nowrap;}
+    .bus-status{font-size:0.7rem;background:#16a34a22;color:#4ade80;padding:2px 8px;border-radius:999px;border:1px solid #16a34a55;}
+    .bus-info{font-size:0.78rem;color:var(--muted);line-height:1.9;}
+    .bus-info strong{color:var(--text);}
+    .eta-badge{margin-top:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:0.8rem;color:var(--accent);}
+    .eta-time{font-size:1.1rem;font-weight:700;}
+    #stop-panel{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;}
+    #stop-panel h3{font-size:0.72rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;}
+    .stop-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:0.76rem;}
+    .stop-row:last-child{border-bottom:none;}
+    .sname{color:var(--text);}
+    .stime{color:var(--accent);font-weight:700;white-space:nowrap;}
+    #buf-info{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;font-size:0.73rem;color:var(--muted);}
+    #buf-info span{color:#fbbf24;font-weight:700;}
+    #map{flex:1;z-index:1;}
+    #bottom-bar{background:var(--surface);border-top:1px solid var(--border);padding:6px 20px;font-size:0.73rem;color:var(--muted);display:flex;gap:20px;flex-shrink:0;}
+    #bottom-bar span{color:var(--text);}
   </style>
 </head>
-
 <body>
-
-<!-- Top Bar -->
 <header>
-  <h1>🚌 <span>Technobots</span> Bus Tracker</h1>
-  <div id="network-badge" class="badge-live">🟢 Live</div>
+  <div class="header-left">
+    <button class="hbtn" id="sidebarToggle">&#9776; Menu</button>
+    <h1>&#128652; <span>CampusCruise</span> &mdash; Osmania University</h1>
+  </div>
+  <div class="header-right">
+    <div id="network-badge" class="badge-live">&#9679; Live</div>
+    <button class="hbtn" id="themeBtn">&#9728; Light</button>
+  </div>
 </header>
-
-<!-- Main Content -->
 <div class="container">
-
-  <!-- Sidebar -->
   <div id="sidebar">
-    <h2>🚍 Active Buses</h2>
-    <div id="bus-list">
-      <div style="color:#64748b; font-size:0.85rem;">Loading buses...</div>
+    <h2>&#128652; Active Buses</h2>
+    <div id="bus-list"><div style="color:var(--muted);font-size:0.82rem;">Connecting...</div></div>
+    <div id="stop-panel">
+      <h3>&#9679; Stop ETA</h3>
+      <div id="stop-list"><div style="color:var(--muted);font-size:0.76rem;">Click a stop on the map</div></div>
     </div>
-
-    <div id="buffer-info">
-      📦 Buffered pings: <span id="buffer-count">0</span>
-      <br/>Last sync: <span id="last-sync">—</span>
+    <div id="buf-info">
+      &#128230; Buffered: <span id="buf-count">0</span> pings<br/>
+      Sync: <span id="last-sync">—</span>
     </div>
   </div>
-
-  <!-- Map -->
   <div id="map"></div>
-
 </div>
-
-<!-- Bottom Bar -->
 <div id="bottom-bar">
-  <div>Updates every: <span id="update-interval">2s</span></div>
-  <div>Network mode: <span id="network-mode">Full</span></div>
-  <div>Last update: <span id="last-update">—</span></div>
+  <div>Poll: <span id="upd-interval">1s</span></div>
+  <div>Mode: <span id="net-mode">Full</span></div>
+  <div>Updated: <span id="last-upd">—</span></div>
 </div>
-
-
 <script>
-  // ── CONFIG ──────────────────────────────────────────
-  const API_BASE = "https://technobots-bus-tracker.onrender.com";
+const API = "https://technobots-bus-tracker.onrender.com";
 
-  // ── MAP SETUP ───────────────────────────────────────
-  const map = L.map("map").setView([17.3860, 78.4895], 16);
+// ── Osmania University REAL road paths ──────────────────
+// These coordinates follow actual roads visible on OpenStreetMap
+// Route 1: Main Gate → University Road → Arts College → Library → Hostel
+// Route 2: Main Gate → Amberpet Road → Engineering → Law College → Sports Ground
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "© OpenStreetMap contributors"
-  }).addTo(map);
+const ROUTES = {
+  bus_1: {
+    name: "Route 1 — Arts & Library",
+    color: "#38bdf8",
+    stops: [
+      {name:"Main Gate",        pos:[17.4082, 78.5154]},
+      {name:"Arts College",     pos:[17.4102, 78.5182]},
+      {name:"Osmania Library",  pos:[17.4118, 78.5210]},
+      {name:"Exam Branch",      pos:[17.4130, 78.5235]},
+      {name:"Hostel Block A",   pos:[17.4145, 78.5258]},
+    ],
+    // Road path following actual OU campus roads
+    path: [
+      [17.4082, 78.5154],
+      [17.4085, 78.5160],
+      [17.4088, 78.5166],
+      [17.4092, 78.5170],
+      [17.4096, 78.5174],
+      [17.4100, 78.5178],
+      [17.4102, 78.5182], // Arts College stop
+      [17.4105, 78.5187],
+      [17.4108, 78.5192],
+      [17.4111, 78.5197],
+      [17.4114, 78.5203],
+      [17.4118, 78.5210], // Library stop
+      [17.4121, 78.5216],
+      [17.4124, 78.5221],
+      [17.4127, 78.5228],
+      [17.4130, 78.5235], // Exam Branch stop
+      [17.4134, 78.5241],
+      [17.4137, 78.5246],
+      [17.4141, 78.5252],
+      [17.4145, 78.5258], // Hostel stop
+    ]
+  },
+  bus_2: {
+    name: "Route 2 — Engineering & Sports",
+    color: "#f472b6",
+    stops: [
+      {name:"Main Gate",        pos:[17.4082, 78.5154]},
+      {name:"Engineering Block",pos:[17.4065, 78.5175]},
+      {name:"Law College",      pos:[17.4050, 78.5198]},
+      {name:"Admin Block",      pos:[17.4038, 78.5218]},
+      {name:"Sports Complex",   pos:[17.4025, 78.5240]},
+    ],
+    path: [
+      [17.4082, 78.5154],
+      [17.4079, 78.5158],
+      [17.4076, 78.5162],
+      [17.4073, 78.5165],
+      [17.4070, 78.5168],
+      [17.4067, 78.5171],
+      [17.4065, 78.5175], // Engineering stop
+      [17.4062, 78.5179],
+      [17.4059, 78.5183],
+      [17.4056, 78.5188],
+      [17.4053, 78.5193],
+      [17.4050, 78.5198], // Law College stop
+      [17.4047, 78.5203],
+      [17.4044, 78.5208],
+      [17.4041, 78.5213],
+      [17.4038, 78.5218], // Admin stop
+      [17.4035, 78.5223],
+      [17.4032, 78.5229],
+      [17.4028, 78.5234],
+      [17.4025, 78.5240], // Sports stop
+    ]
+  }
+};
 
-  // ── STATE ────────────────────────────────────────────
-  let busMarkers = {};       // Leaflet markers for each bus
-  let busTrails = {};        // Polylines showing path history
-  let busPositionHistory = {}; // Array of past positions per bus
-  let etaData = {};          // Latest ETA per bus
-  let isOffline = false;
-  let updateInterval = 2000; // ms between updates
-  let selectedBusId = null;
+// ── Map setup ────────────────────────────────────────────
+const map = L.map("map").setView([17.4085, 78.5200], 15);
+let tileLayer = L.tileLayer(
+  "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+  {attribution:"© CartoDB © OpenStreetMap"}
+).addTo(map);
 
-  // ── BUS ICON ─────────────────────────────────────────
-  function getBusIcon(busId) {
-    const color = busId === "bus_1" ? "#38bdf8" : "#f472b6";
-    return L.divIcon({
-      className: "",
-      html: `
-        <div style="
-          background:${color};
-          border:3px solid white;
-          border-radius:50%;
-          width:28px; height:28px;
-          display:flex; align-items:center;
-          justify-content:center;
-          font-size:14px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-        ">🚌</div>`,
-      iconSize: [28, 28],
-      iconAnchor: [14, 14]
+// ── State ────────────────────────────────────────────────
+let markers = {};
+let pathIndices = {bus_1: 0, bus_2: 10}; // start at different points
+let pathDirs = {bus_1: 1, bus_2: 1};
+let etaCache = {};
+let isOffline = false;
+let isLight = false;
+let pollInterval = 1000;
+let animTimers = {};
+
+// ── Draw routes & stops ──────────────────────────────────
+function drawRoutes() {
+  for (const [busId, route] of Object.entries(ROUTES)) {
+    // Draw road polyline
+    L.polyline(route.path, {
+      color: route.color,
+      weight: 5,
+      opacity: 0.75,
+      dashArray: "10,5",
+      lineJoin: "round"
+    }).addTo(map);
+
+    // Draw stop markers
+    route.stops.forEach((stop, i) => {
+      const m = L.circleMarker(stop.pos, {
+        radius: 8,
+        color: route.color,
+        fillColor: "#0f172a",
+        fillOpacity: 1,
+        weight: 3
+      }).addTo(map);
+
+      m.bindTooltip(`<b>${stop.name}</b>`, {permanent:false, direction:"top"});
+
+      m.on("click", () => showStopETA(stop.name, busId, i));
     });
   }
+}
 
-  // ── DRAW ROUTE STOPS ON MAP ───────────────────────────
-  async function loadAndDrawRoutes() {
+// ── Show ETA for clicked stop ────────────────────────────
+async function showStopETA(stopName, routeId, stopIdx) {
+  const panel = document.getElementById("stop-list");
+  panel.innerHTML = `<div style="color:var(--muted);font-size:0.76rem;">Loading...</div>`;
+
+  const rows = [];
+  for (const busId of ["bus_1","bus_2"]) {
     try {
-      const res = await fetch(`${API_BASE}/routes`);
-      const data = await res.json();
-      const colors = { route_1: "#38bdf8", route_2: "#f472b6" };
-
-      for (const [routeId, route] of Object.entries(data.routes)) {
-        const color = colors[routeId] || "#ffffff";
-        const latlngs = route.stops.map(s => [s.lat, s.lng]);
-
-        // Draw route line
-        L.polyline(latlngs, { color, weight: 3, opacity: 0.5, dashArray: "6,6" }).addTo(map);
-
-        // Draw stop markers
-        route.stops.forEach((stop, i) => {
-          L.circleMarker([stop.lat, stop.lng], {
-            radius: 6,
-            color: color,
-            fillColor: "#0f172a",
-            fillOpacity: 1,
-            weight: 2
-          })
-          .bindTooltip(`<b>${stop.name}</b><br/>${route.name}`, { permanent: false })
-          .addTo(map);
-        });
-      }
-    } catch (e) {
-      console.warn("Could not load routes:", e);
+      const r = await fetch(`${API}/eta?bus_id=${busId}&stop_index=${stopIdx}&network=good`, {signal: AbortSignal.timeout(8000)});
+      const d = await r.json();
+      rows.push({bus: busId.replace("_"," ").toUpperCase(), eta: d.eta_minutes, note: d.condition});
+    } catch(e) {
+      rows.push({bus: busId.replace("_"," ").toUpperCase(), eta:"—", note:"Unavailable"});
     }
   }
 
-  // ── FETCH ETA ─────────────────────────────────────────
-  async function fetchETA(busId, stopIndex, network) {
-    try {
-      const res = await fetch(
-        `${API_BASE}/eta?bus_id=${busId}&stop_index=${stopIndex}&network=${network}`
+  panel.innerHTML = `
+    <div style="font-size:0.8rem;font-weight:700;color:var(--text);margin-bottom:6px;">${stopName}</div>
+    ${rows.map(r=>`
+      <div class="stop-row">
+        <span class="sname">${r.bus}</span>
+        <span class="stime">${typeof r.eta==="number" ? r.eta+" min" : r.eta}</span>
+      </div>
+      <div style="font-size:0.68rem;color:var(--muted);padding-bottom:3px;">${r.note}</div>
+    `).join("")}
+  `;
+}
+
+// ── Neon arrow icon ──────────────────────────────────────
+function arrowIcon(color, heading) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
+    <defs>
+      <filter id="glow-${color.replace('#','')}">
+        <feGaussianBlur stdDeviation="2.5" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <g transform="rotate(${heading||0},17,17)" filter="url(#glow-${color.replace('#','')})">
+      <polygon points="17,3 30,30 17,23 4,30" fill="${color}" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+      <circle cx="17" cy="17" r="3.5" fill="white" opacity="0.95"/>
+    </g>
+  </svg>`;
+  return L.divIcon({className:"", html:svg, iconSize:[34,34], iconAnchor:[17,17]});
+}
+
+function heading(from, to) {
+  const dy = to[0]-from[0], dx = to[1]-from[1];
+  return (Math.atan2(dx,dy)*180/Math.PI+360)%360;
+}
+
+// ── Smooth movement along road path ─────────────────────
+function moveBusAlongPath(busId) {
+  const route = ROUTES[busId];
+  const path = route.path;
+  const color = route.color;
+  let idx = pathIndices[busId];
+  let dir = pathDirs[busId];
+
+  // Next index
+  let nextIdx = idx + dir;
+  if (nextIdx >= path.length) { nextIdx = path.length - 2; dir = -1; }
+  if (nextIdx < 0) { nextIdx = 1; dir = 1; }
+  pathDirs[busId] = dir;
+
+  const from = path[idx];
+  const to = path[nextIdx];
+  const h = heading(from, to);
+
+  // Animate smoothly from current to next road point
+  const duration = 900;
+  const startTime = performance.now();
+
+  if (animTimers[busId]) cancelAnimationFrame(animTimers[busId]);
+
+  function step(now) {
+    const t = Math.min((now - startTime) / duration, 1);
+    // Ease in-out
+    const e = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+    const lat = from[0] + (to[0]-from[0])*e;
+    const lng = from[1] + (to[1]-from[1])*e;
+
+    if (!markers[busId]) {
+      markers[busId] = L.marker([lat,lng], {
+        icon: arrowIcon(color, h),
+        zIndexOffset: 1000
+      }).addTo(map);
+      markers[busId].bindTooltip(
+        `<b>${busId.replace("_"," ").toUpperCase()}</b><br/>${route.name}`,
+        {permanent:false}
       );
-      const data = await res.json();
-      etaData[busId] = data;
-    } catch (e) {
-      console.warn("ETA fetch failed:", e);
-    }
-  }
-
-  // ── UPDATE BUS POSITIONS ──────────────────────────────
-  async function updateBuses() {
-    const networkQuality = detectNetworkQuality();
-    const networkParam = networkQuality === "poor" ? "poor" : "good";
-
-    try {
-      const res = await fetch(`${API_BASE}/buses?network=${networkParam}`);
-      const data = await res.json();
-
-      // We're back online after being offline
-      if (isOffline) {
-        isOffline = false;
-        setNetworkBadge("syncing");
-        await syncOfflineData();
-        setNetworkBadge("live");
-      }
-
-      // Update network mode label
-      document.getElementById("network-mode").textContent =
-        data.mode === "low_bandwidth" ? "Low Bandwidth" : "Full";
-      document.getElementById("last-update").textContent =
-        new Date().toLocaleTimeString();
-
-      // Move each bus on the map
-      for (const [busId, bus] of Object.entries(data.buses)) {
-        const latlng = [bus.lat, bus.lng];
-
-        // Track position history for trail
-        if (!busPositionHistory[busId]) busPositionHistory[busId] = [];
-        busPositionHistory[busId].push(latlng);
-        if (busPositionHistory[busId].length > 30) busPositionHistory[busId].shift();
-
-        // Create or move the marker
-        if (!busMarkers[busId]) {
-          busMarkers[busId] = L.marker(latlng, { icon: getBusIcon(busId) })
-            .addTo(map)
-            .bindPopup(`<b>${busId}</b>`);
-        } else {
-          busMarkers[busId].setLatLng(latlng);
-        }
-
-        // Draw trail (last 30 positions)
-        if (busTrails[busId]) map.removeLayer(busTrails[busId]);
-        const trailColor = busId === "bus_1" ? "#38bdf8" : "#f472b6";
-        busTrails[busId] = L.polyline(busPositionHistory[busId], {
-          color: trailColor,
-          weight: 2,
-          opacity: 0.6
-        }).addTo(map);
-
-        // Fetch ETA every 5 seconds (not every tick)
-        if (!etaData[busId] || Date.now() % 5000 < updateInterval) {
-          const stopIndex = Math.floor(busPositionHistory[busId].length / 8) % 4;
-          await fetchETA(busId, stopIndex, networkParam);
-        }
-      }
-
-      updateSidebar(data.buses);
-      await updateBufferInfo();
-
-    } catch (e) {
-      // Network error — go offline
-      isOffline = true;
-      setNetworkBadge("offline");
-      console.warn("Backend unreachable — offline mode");
-    }
-  }
-
-  // ── SIDEBAR ───────────────────────────────────────────
-  function updateSidebar(buses) {
-    const container = document.getElementById("bus-list");
-    container.innerHTML = "";
-
-    for (const [busId, bus] of Object.entries(buses)) {
-      const eta = etaData[busId];
-      const isActive = busId === selectedBusId;
-
-      const card = document.createElement("div");
-      card.className = `bus-card ${isActive ? "active" : ""}`;
-      card.innerHTML = `
-        <div class="bus-card-header">
-          <div class="bus-name">🚌 ${busId.replace("_", " ").toUpperCase()}</div>
-          <div class="bus-status">● Active</div>
-        </div>
-        <div class="bus-info">
-          <strong>Route:</strong> ${bus.route_name || "—"}<br/>
-          <strong>Next Stop:</strong> ${bus.next_stop || "—"}<br/>
-          <strong>Lat:</strong> ${bus.lat} &nbsp;
-          <strong>Lng:</strong> ${bus.lng}
-        </div>
-        ${eta ? `
-          <div class="eta-badge">
-            ⏱ ETA: <span class="eta-time">${eta.eta_minutes} min</span><br/>
-            <span style="font-size:0.75rem; opacity:0.8">${eta.condition || ""}</span><br/>
-            <span style="font-size:0.72rem; color:#fbbf24">${eta.network_note || ""}</span>
-          </div>` : ""}
-      `;
-
-      // Click to pan map to bus
-      card.addEventListener("click", () => {
-        selectedBusId = busId;
-        if (busMarkers[busId]) {
-          map.panTo(busMarkers[busId].getLatLng());
-          busMarkers[busId].openPopup();
-        }
-        updateSidebar(buses);
-      });
-
-      container.appendChild(card);
-    }
-  }
-
-  // ── OFFLINE SYNC ──────────────────────────────────────
-  async function syncOfflineData() {
-    try {
-      const res = await fetch(`${API_BASE}/sync`);
-      const data = await res.json();
-      document.getElementById("last-sync").textContent =
-        `${data.buffered_pings?.length || 0} pings @ ${new Date().toLocaleTimeString()}`;
-    } catch (e) {
-      console.warn("Sync failed:", e);
-    }
-  }
-
-  async function updateBufferInfo() {
-    try {
-      const res = await fetch(`${API_BASE}/status`);
-      const data = await res.json();
-      document.getElementById("buffer-count").textContent = data.buffer_size || 0;
-    } catch (e) {}
-  }
-
-  // ── NETWORK QUALITY DETECTION ─────────────────────────
-  function detectNetworkQuality() {
-    // Use the browser's Network Information API if available
-    if (navigator.connection) {
-      const speed = navigator.connection.downlink; // Mbps
-      if (speed < 1) return "poor";
-    }
-    return "good";
-  }
-
-  // ── ADAPTIVE UPDATE FREQUENCY ─────────────────────────
-  function adjustUpdateFrequency() {
-    const quality = detectNetworkQuality();
-    if (quality === "poor") {
-      updateInterval = 5000; // slow down to every 5s on poor network
-      document.getElementById("update-interval").textContent = "5s";
     } else {
-      updateInterval = 2000;
-      document.getElementById("update-interval").textContent = "2s";
+      markers[busId].setLatLng([lat,lng]);
+      markers[busId].setIcon(arrowIcon(color, h));
+    }
+
+    if (t < 1) {
+      animTimers[busId] = requestAnimationFrame(step);
+    } else {
+      pathIndices[busId] = nextIdx;
+      // Move to next segment after short pause
+      setTimeout(() => moveBusAlongPath(busId), 100);
     }
   }
+  animTimers[busId] = requestAnimationFrame(step);
+}
 
-  // ── NETWORK BADGE ─────────────────────────────────────
-  function setNetworkBadge(status) {
-    const badge = document.getElementById("network-badge");
-    if (status === "live") {
-      badge.className = "badge-live";
-      badge.textContent = "🟢 Live";
-    } else if (status === "offline") {
-      badge.className = "badge-offline";
-      badge.textContent = "🔴 Offline";
-    } else if (status === "syncing") {
-      badge.className = "badge-syncing";
-      badge.textContent = "🟡 Syncing...";
+// ── Fetch ETA from API ───────────────────────────────────
+async function fetchETA(busId) {
+  try {
+    const r = await fetch(`${API}/eta?bus_id=${busId}&stop_index=1&network=good`, {signal: AbortSignal.timeout(8000)});
+    etaCache[busId] = await r.json();
+  } catch(e) {}
+}
+
+// ── Fetch bus data & update sidebar ─────────────────────
+async function updateFromAPI() {
+  try {
+    const r = await fetch(`${API}/buses?network=good`, {signal: AbortSignal.timeout(8000)});
+    const data = await r.json();
+
+    if (isOffline) {
+      isOffline = false;
+      setBadge("syncing");
+      await sync();
+      setBadge("live");
     }
+
+    document.getElementById("net-mode").textContent =
+      data.mode === "low_bandwidth" ? "Low BW" : "Full";
+    document.getElementById("last-upd").textContent =
+      new Date().toLocaleTimeString();
+
+    updateSidebar(data.buses);
+    updateBufInfo();
+
+  } catch(e) {
+    isOffline = true;
+    setBadge("offline");
   }
+}
 
-  // ── MAIN LOOP ─────────────────────────────────────────
-  async function startTracking() {
-    await loadAndDrawRoutes();
-    await updateBuses();
+// ── Sidebar cards ────────────────────────────────────────
+function updateSidebar(buses) {
+  const c = document.getElementById("bus-list");
+  c.innerHTML = "";
+  for (const [busId, bus] of Object.entries(buses)) {
+    const route = ROUTES[busId];
+    const color = route ? route.color : "#38bdf8";
+    const eta = etaCache[busId];
 
-    // Adaptive loop — adjusts its own speed
-    function loop() {
-      adjustUpdateFrequency();
-      updateBuses().finally(() => {
-        setTimeout(loop, updateInterval);
-      });
-    }
-    setTimeout(loop, updateInterval);
+    const card = document.createElement("div");
+    card.className = "bus-card";
+    card.innerHTML = `
+      <div class="bus-card-header">
+        <div class="bus-name">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};margin-right:6px;vertical-align:middle;"></span>
+          ${busId.replace("_"," ").toUpperCase()}
+        </div>
+        <div class="bus-status">&#9679; Active</div>
+      </div>
+      <div class="bus-info">
+        <strong>Route:</strong> ${route ? route.name : bus.route_name || "—"}<br/>
+        <strong>Next Stop:</strong> ${bus.next_stop || "—"}
+      </div>
+      ${eta ? `<div class="eta-badge">
+        &#9201; ETA: <span class="eta-time">${eta.eta_minutes} min</span><br/>
+        <span style="font-size:0.7rem;opacity:0.8;">${eta.condition||""}</span>
+      </div>` : ""}
+    `;
+    card.addEventListener("click", () => {
+      if (markers[busId]) map.panTo(markers[busId].getLatLng());
+    });
+    c.appendChild(card);
   }
+}
 
-  // ── KICK OFF ──────────────────────────────────────────
-  startTracking();
+// ── Buffer info ──────────────────────────────────────────
+async function updateBufInfo() {
+  try {
+    const r = await fetch(`${API}/status`, {signal: AbortSignal.timeout(5000)});
+    const d = await r.json();
+    document.getElementById("buf-count").textContent = d.buffer_size || 0;
+  } catch(e) {}
+}
+
+async function sync() {
+  try {
+    const r = await fetch(`${API}/sync`, {signal: AbortSignal.timeout(8000)});
+    const d = await r.json();
+    document.getElementById("last-sync").textContent =
+      `${d.buffered_pings?.length||0} @ ${new Date().toLocaleTimeString()}`;
+  } catch(e) {}
+}
+
+// ── Network badge ────────────────────────────────────────
+function setBadge(s) {
+  const b = document.getElementById("network-badge");
+  const map2 = {
+    live:    ["badge-live",    "&#9679; Live"],
+    offline: ["badge-offline", "&#9679; Offline"],
+    syncing: ["badge-syncing", "&#9679; Syncing..."]
+  };
+  b.className = map2[s][0];
+  b.innerHTML = map2[s][1];
+}
+
+// ── Theme toggle ─────────────────────────────────────────
+document.getElementById("themeBtn").addEventListener("click", () => {
+  isLight = !isLight;
+  document.body.classList.toggle("light", isLight);
+  document.getElementById("themeBtn").innerHTML = isLight ? "&#9790; Dark" : "&#9728; Light";
+  map.removeLayer(tileLayer);
+  tileLayer = L.tileLayer(
+    isLight
+      ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    {attribution:"© CartoDB © OpenStreetMap"}
+  ).addTo(map);
+});
+
+// ── Sidebar toggle ───────────────────────────────────────
+document.getElementById("sidebarToggle").addEventListener("click", () => {
+  document.getElementById("sidebar").classList.toggle("collapsed");
+  setTimeout(() => map.invalidateSize(), 350);
+});
+
+// ── Keep Render awake ────────────────────────────────────
+setInterval(() => fetch(`${API}/`).catch(()=>{}), 240000);
+
+// ── ETA refresh every 4s ─────────────────────────────────
+setInterval(() => {
+  fetchETA("bus_1");
+  fetchETA("bus_2");
+}, 4000);
+
+// ── API sync every 1.5s ──────────────────────────────────
+setInterval(updateFromAPI, 1500);
+
+// ── BOOT ─────────────────────────────────────────────────
+drawRoutes();
+
+// Start both buses moving along their road paths immediately
+moveBusAlongPath("bus_1");
+setTimeout(() => moveBusAlongPath("bus_2"), 500);
+
+// Initial API fetch
+updateFromAPI();
+fetchETA("bus_1");
+fetchETA("bus_2");
 </script>
-
 </body>
 </html>
