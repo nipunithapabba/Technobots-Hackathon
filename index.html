@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CampusCruise</title>
+  <title>CampusCruise | CBIT Transit</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
@@ -71,7 +71,6 @@
       background:#16a34a;transition:background 0.3s;
     }
     .net-badge.offline{background:#dc2626;}
-    .net-badge.syncing{background:#d97706;}
 
     .body{flex:1;min-height:0;display:flex;overflow:hidden;}
 
@@ -80,7 +79,7 @@
       background:var(--panel);
       border-right:1px solid var(--border);
       display:flex;flex-direction:column;
-      transition:width 0.28s ease,opacity 0.28s ease;
+      transition:width 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease;
       flex-shrink:0;overflow:hidden;z-index:50;
     }
     #sidebar.closed{width:0;opacity:0;pointer-events:none;}
@@ -136,26 +135,14 @@
       padding:4px 0;border-top:1px solid var(--border);
     }
     .bc-row strong{color:var(--text);font-size:0.82rem;}
-    .bc-eta{
-      margin-top:6px;padding:6px 10px;
-      background:rgba(56,189,248,0.08);
-      border:1px solid rgba(56,189,248,0.2);
-      border-radius:8px;
-      display:flex;justify-content:space-between;align-items:center;
-      font-size:0.78rem;color:var(--muted);
-    }
-    .bc-eta b{color:var(--accent);font-size:1rem;}
-
+    
     .occ-badge {
-        font-size: 0.65rem;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-weight: bold;
-        text-transform: uppercase;
+        font-size: 0.65rem; padding: 2px 8px; border-radius: 4px;
+        font-weight: bold; text-transform: uppercase;
     }
     .Low { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
     .Medium { background: rgba(234, 179, 8, 0.15); color: #fbbf24; border: 1px solid rgba(234, 179, 8, 0.3); }
-    .High { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); box-shadow: 0 0 8px rgba(239, 68, 68, 0.2); }
+    .High { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
 
     .High-Traffic { filter: hue-rotate(90deg) brightness(1.2); }
 
@@ -167,9 +154,20 @@
       z-index:10;padding:7px 16px;border-radius:999px;
       background:var(--panel);border:1px solid var(--border);
       font-size:0.78rem;color:var(--muted);white-space:nowrap;
-      pointer-events:none;
-      backdrop-filter: blur(4px);
+      pointer-events:none; backdrop-filter: blur(4px);
     }
+
+    /* ── STOP POPUP STYLING ── */
+    .sp { min-width: 170px; padding: 2px; }
+    .sp-title { font-size: 0.95rem; font-weight: 800; margin-bottom: 10px; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
+    .sp-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 0.85rem; }
+    .sp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .sp-bus { flex: 1; font-weight: 500; color: #475569; }
+    .sp-time { font-weight: 800; color: #0284c7; }
+    .sp-note { font-size: 0.7rem; color: #94a3b8; margin-top: -4px; margin-left: 16px; margin-bottom: 4px; }
+
+    .leaflet-popup-content-wrapper { border-radius: 12px !important; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1) !important; }
+    .leaflet-popup-tip { display: none; }
 
     footer{
       height:36px;padding:0 18px;
@@ -178,19 +176,7 @@
       font-size:0.72rem;color:var(--muted);flex-shrink:0;
     }
     footer b{color:var(--text);}
-
     .bm{width:34px;height:34px;display:flex;align-items:center;justify-content:center;transform-origin:center;}
-    .sp{min-width:190px;font-family:Inter,'Segoe UI',sans-serif;}
-    .sp-title{font-size:0.88rem;font-weight:700;color:#0f172a;margin-bottom:8px;}
-    .sp-row{display:grid;grid-template-columns:8px 1fr auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid #e2e8f0;font-size:0.8rem;}
-    .sp-dot{width:8px;height:8px;border-radius:50%;}
-    .sp-bus{color:#334155;}
-    .sp-time{font-weight:700;color:#0284c7;}
-    .sp-note{grid-column:2/-1;font-size:0.7rem;color:#94a3b8;margin-top:-4px;padding-bottom:2px;}
-
-    .leaflet-popup-content-wrapper{border-radius:14px!important;padding:2px!important;box-shadow:0 4px 20px rgba(0,0,0,0.18)!important;}
-    .leaflet-popup-content{margin:12px 14px!important;}
-    .leaflet-popup-tip{display:none;}
   </style>
 </head>
 <body>
@@ -223,7 +209,7 @@
 
     <div class="map-wrap">
       <div id="map"></div>
-      <div class="map-hint">● Click any stop marker for live ETA</div>
+      <div class="map-hint">● Click any stop for live ETA popups</div>
     </div>
   </div>
 
@@ -254,7 +240,7 @@ const ROUTES = {
     color:"#f472b6",
     path:[
       [17.3912, 78.3190], [17.3908, 78.3195], [17.3902, 78.3200], 
-      [17.3915, 78.3185], [17.3895, 78.3205], [17.3890, 78.3210]
+      [17.3895, 78.3205], [17.3890, 78.3210]
     ],
     stops:[ {n:"Main Gate", i:0}, {n:"ECE Block", i:2}, {n:"Sports Court", i:4} ]
   }
@@ -291,11 +277,10 @@ function renderSidebar(){
       <div class="bc-top">
         <div class="bc-stripe" style="background:${rd.color}"></div>
         <div class="bc-info"><div class="bc-name">${rd.label}</div><div class="bc-route">${rd.name}</div></div>
-        <div class="occ-badge ${bus.occupancy}">${bus.occupancy}</div>
+        <div class="occ-badge ${bus.occupancy || 'Low'}">${bus.occupancy || 'Low'}</div>
       </div>
       <div class="bc-row"><span>Next</span><strong>${bus.next_stop || "—"}</strong></div>
       <div class="bc-row"><span>Weather</span><strong>${bus.weather || "—"}</strong></div>
-      ${eta ? `<div class="bc-eta"><span>ETA</span><b>${eta.eta_minutes} min</b></div>`:''}
     </button>`;
   }).join("");
 }
@@ -321,11 +306,25 @@ async function pollETA(id){
 
 function drawRoutes(){
   for(const [id, r] of Object.entries(ROUTES)){
-    L.polyline(r.path,{color:r.color, weight:6, opacity:0.5, lineCap:"round", lineJoin: "round"}).addTo(map);
+    L.polyline(r.path,{color:r.color, weight:6, opacity:0.4, lineCap:"round", lineJoin: "round"}).addTo(map);
     r.stops.forEach((s)=>{
       const pos = r.path[s.i];
-      const cm = L.circleMarker(pos,{radius:7, color:r.color, fillColor:isDark?"#07111f":"#fff", fillOpacity:1, weight:2}).addTo(map);
-      cm.bindTooltip(`<b>${s.n}</b>`);
+      const cm = L.circleMarker(pos,{radius:8, color:r.color, fillColor:isDark?"#07111f":"#fff", fillOpacity:1, weight:3}).addTo(map);
+      cm.bindTooltip(`<b>${s.n}</b>`, {direction: "top", offset: [0, -5]});
+
+      cm.on("click", async () => {
+        cm.bindPopup(`<div class="sp"><div class="sp-title">${s.n}</div><div style="font-size:0.8rem;">📡 Fetching live ETAs...</div></div>`, {closeButton:false}).openPopup();
+        let rows = [];
+        for(const bid of Object.keys(ROUTES)){
+            try {
+                const res = await fetch(`${API}/eta?bus_id=${bid}&stop_index=${s.i}&network=good`);
+                const d = await res.json();
+                rows.push({label: ROUTES[bid].label, color: ROUTES[bid].color, eta: d.eta_minutes, note: d.condition});
+            } catch { rows.push({label: ROUTES[bid].label, color: ROUTES[bid].color, eta: "—"}); }
+        }
+        cm.setPopupContent(`<div class="sp"><div class="sp-title">${s.n}</div>` + 
+            rows.map(row => `<div class="sp-row"><span class="sp-dot" style="background:${row.color}"></span><span class="sp-bus">${row.label}</span><span class="sp-time">${typeof row.eta==='number'?row.eta+' min':row.eta}</span></div>${row.note?`<div class="sp-note">${row.note}</div>`:''}`).join("") + `</div>`);
+      });
     });
   }
 }
@@ -343,12 +342,10 @@ function moveBus(id){
   const path = r.path;
   let idx = pathIdx[id];
   let nxt = (idx + 1 >= path.length) ? 0 : idx + 1;
-
   const from = path[idx], to = path[nxt];
   const deg = hdg(from, to);
   
-  // SLOW SPEED: 10000ms (10 seconds) per road segment
-  const DUR = 10000; 
+  const DUR = 10000; // SLOW: 10 seconds per segment
   const t0 = performance.now();
 
   if(animID[id]) cancelAnimationFrame(animID[id]);
@@ -357,13 +354,11 @@ function moveBus(id){
     const p = Math.min((now - t0) / DUR, 1);
     const lat = from[0] + (to[0] - from[0]) * p;
     const lng = from[1] + (to[1] - from[1]) * p;
-
     if(!markers[id]){
       markers[id] = L.marker([lat, lng], {icon: busIcon(r.color, deg), zIndexOffset: 1000}).addTo(map);
     } else {
       markers[id].setLatLng([lat, lng]).setIcon(busIcon(r.color, deg));
     }
-
     if(apiBuses[id]?.occupancy === "High") markers[id]._icon.classList.add("High-Traffic");
     else if(markers[id]._icon) markers[id]._icon.classList.remove("High-Traffic");
 
